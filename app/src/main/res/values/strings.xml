@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ApolloBet</string>
+    <string name="strClear">Clear</string>
+    <string name="strConfirm">Confirm</string>
+</resources>
