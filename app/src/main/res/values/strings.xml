@@ -7,6 +7,7 @@
     <string name="lose">负</string>
     <string name="more">更多</string>
     <string name="strAutoRefresh">自动刷新</string>
-    <string name="strAutoSelectByOdds">根据赔率</string>
-    <string name="strAutoSelectByHandicap">根据盘口</string>
+    <string name="strAutoSelectByOdds">根据赔率自选</string>
+    <string name="strAutoSelectByHandicap">根据盘口自选</string>
+    <string name="strAutoSelectByProfitAndLoss">根据盈亏自择</string>
 </resources>

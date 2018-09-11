@@ -14,7 +14,7 @@ public enum OddsType {
     GOAL_FOUR("s4", "4球"),
     GOAL_FIVE("s5", "5球"),
     GOAL_SIX("s6", "6球"),
-    GOAL_SEVEN_PLUS("07", "7+球"),
+    GOAL_SEVEN_PLUS("s7", "7+球"),
 
     // 1 x 2 odds win/draw/lose
     LOSE("a", "负"),

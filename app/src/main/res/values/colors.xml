@@ -7,9 +7,9 @@
 
     <color name="colorMatchParent">#e7eded</color>
     <color name="colorArrow">#a0a5a6</color>
-    <color name="colorWin">#fc8d8d</color>
-    <color name="colorDraw">#9696fa</color>
-    <color name="colorLose">#adefad</color>
+    <color name="colorWin">#ffffff</color>
+    <color name="colorDraw">#ffffff</color>
+    <color name="colorLose">#ffffff</color>
     <color name="colorTableDivider">#e7eded</color>
 
     <color name="colorPositiveSpread">#a2f484</color>
@@ -19,4 +19,6 @@
     <color name="colorBtnClear">#717070</color>
     <color name="colorTextOfBtnClear">#ffffff</color>
     <color name="colorBottomOptions">#cacacf</color>
+    <color name="colorOddSelected">#f21023</color>
+    <color name="colorOddNotSelected">#ffffff</color>
 </resources>

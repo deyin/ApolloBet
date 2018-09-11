@@ -1,17 +1,19 @@
 package dylan.io.apollobet;
 
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.LruCache;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
@@ -20,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,8 +37,11 @@ import java.util.regex.Pattern;
 
 import dylan.io.apollobet.adapters.DividerItemDecoration;
 import dylan.io.apollobet.adapters.MatchAdapter;
+import dylan.io.apollobet.listeners.OnOddsSelectedListener;
 import dylan.io.apollobet.models.Match;
 import dylan.io.apollobet.models.MatchParent;
+import dylan.io.apollobet.models.Odds;
+import dylan.io.apollobet.models.OddsType;
 import dylan.io.apollobet.utils.MatchParser;
 import dylan.io.apollobet.utils.DateUtils;
 import dylan.io.apollobet.utils.SSLUtils;
@@ -45,13 +51,16 @@ import static java.util.stream.Collectors.groupingBy;
 
 public class MainActivity extends AppCompatActivity
         implements SwipeRefreshLayout.OnRefreshListener,
-        CompoundButton.OnCheckedChangeListener {
+        CompoundButton.OnCheckedChangeListener,
+        OnOddsSelectedListener {
 
-    /// Key = 1001(number of the match),Value=Match
-    private Map<Integer, Match> selectedMatches = new ConcurrentHashMap<>();
+    private final LruCache<Date, List<MatchParent>> lastUpdated
+            = new LruCache<Date, List<MatchParent>>(24 * 4 * 15 * 100) {
 
-    /// Volley
-    private RequestQueue mRequestQueue;
+    };
+
+    /// Key = Match Id,Value=Match
+    private Map<String, Match> selectedMatches = new ConcurrentHashMap<>();
 
     /// UI
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -62,16 +71,17 @@ public class MainActivity extends AppCompatActivity
     private Timer mTimer;
     private TimerTask mTimerTask;
     final Handler mTimerHandler = new Handler();
-    private static long MAX_TARDINESS = 5 * 60 * 1000; // 5 minutes
+    private static long MAX_TARDINESS = 3 * 60 * 1000; // minutes
 
 
-    private CheckBox mAutoRefresh;
     private CheckBox mAutoSelectByOdds;
     private CheckBox mAutoSelectByHandicap;
+    private CheckBox mAutoSelectByProfitAndLoss;
 
     @Override
     protected void onResume() {
         super.onResume();
+        startTimer();
     }
 
     @Override
@@ -88,12 +98,7 @@ public class MainActivity extends AppCompatActivity
                 if (System.currentTimeMillis() - scheduledExecutionTime() >= MAX_TARDINESS) {
                     return;  // Too late; skip this execution.
                 }
-                mTimerHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        downloadMatchGroups();
-                    }
-                });
+                mTimerHandler.post(() -> downloadMatchGroups());
             }
         };
         mTimer.schedule(mTimerTask, 0, MAX_TARDINESS);
@@ -124,21 +129,16 @@ public class MainActivity extends AppCompatActivity
         mAdapter = new MatchAdapter(this, new ArrayList<>());
         mRecyclerView.setAdapter(mAdapter);
 
-        mAutoRefresh = findViewById(R.id.cb_auto_refresh);
-        mAutoRefresh.setOnCheckedChangeListener(this);
-
         mAutoSelectByOdds = findViewById(R.id.cb_auto_select_by_odds);
         mAutoSelectByOdds.setOnCheckedChangeListener(this);
 
         mAutoSelectByHandicap = findViewById(R.id.cb_auto_select_by_handicap);
         mAutoSelectByHandicap.setOnCheckedChangeListener(this);
+
+        mAutoSelectByProfitAndLoss = findViewById(R.id.cb_auto_select_by_profit_and_loss);
+        mAutoSelectByProfitAndLoss.setOnCheckedChangeListener(this);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        downloadMatchGroups();
-    }
 
     @Override
     public void onRefresh() {
@@ -197,6 +197,8 @@ public class MainActivity extends AppCompatActivity
             try {
                 JSONObject jsonObject = new JSONObject(json);
                 JSONObject data = jsonObject.getJSONObject("data");
+                String strLastUpdated = jsonObject.getJSONObject("status").getString("last_updated");
+                Date lastUpdatedDate = DateUtils.toDate("yyyy-MM-dd HH:mm:ss", strLastUpdated);
                 JSONArray ids = data.names();
                 for (int i = 0; i < ids.length(); i++) {
                     String _id = ids.get(i).toString();
@@ -205,15 +207,22 @@ public class MainActivity extends AppCompatActivity
                     Match match = MatchParser.parse(jsonMatch);
                     matches.add(match);
                 }
+                // group by Date(yyyy-MM-dd)
+                List<MatchParent> matchParents = groupByDate(matches);
+
+
+                if (lastUpdated.get(lastUpdatedDate) == null) {
+                    lastUpdated.put(lastUpdatedDate, matchParents);
+                    // adapter to update data, fire UI refresh
+                    mAdapter.updateMatchParent(matchParents, true);
+                } else {
+                    Log.i("updateMatchParent", "No odds updated since last update time: " + strLastUpdated);
+                    Toast.makeText(MainActivity.this, "No odds updated since " + strLastUpdated, Toast.LENGTH_SHORT).show();
+                }
+
             } catch (Exception e) {
                 Log.e("newJSONObject", e.getMessage());
             }
-
-            // group by Date(yyyy-MM-dd)
-            List<MatchParent> matchParents = groupByDate(matches);
-
-            // adapter to update data, fire UI refresh
-            mAdapter.updateMatchParent(matchParents, true);
         };
 
         Response.ErrorListener errorListener = error -> VolleyLog.e("volley.onErrorResponse", error);
@@ -247,30 +256,23 @@ public class MainActivity extends AppCompatActivity
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         int id = buttonView.getId();
         switch (id) {
-            case R.id.cb_auto_refresh:
-                onAutoRefreshChecked(buttonView.isChecked());
-                break;
             case R.id.cb_auto_select_by_odds:
                 onAutoSelectByOdds(buttonView.isChecked());
                 break;
             case R.id.cb_auto_select_by_handicap:
                 onAutoSelectByHandicap(buttonView.isChecked());
                 break;
+            case R.id.cb_auto_select_by_profit_and_loss:
+                onAutoSelectByProfitAndLoss(buttonView.isChecked());
+                break;
             default:
                 break;
         }
     }
 
-    private void onAutoRefreshChecked(boolean checked) {
-        if(checked) {
-            startTimer();
-        } else {
-            cancelTimer();
-        }
-    }
 
     private void onAutoSelectByOdds(boolean checked) {
-        if(checked) {
+        if (checked) {
 
         } else {
 
@@ -278,10 +280,40 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void onAutoSelectByHandicap(boolean checked) {
-        if(checked) {
+        if (checked) {
 
         } else {
 
         }
+    }
+
+    private void onAutoSelectByProfitAndLoss(boolean checked) {
+        if (checked) {
+
+        } else {
+
+        }
+    }
+
+    @Override
+    public void onOddsSelected(@NonNull Match match, @NonNull OddsType oddsType, boolean selected) {
+        final Map<OddsType, Odds> oddsMap = match.getOddsMap();
+        oddsMap.get(oddsType).setSelected(selected);
+
+        if(selected) {
+            selectedMatches.putIfAbsent(match.getId(), match);
+        } else if(selectedMatches.containsKey(match.getId()) && noneOfOddsSelected(oddsMap)){
+             selectedMatches.remove(match.getId());
+        }
+    }
+
+    private boolean noneOfOddsSelected(Map<OddsType, Odds> oddsMap) {
+        Collection<Odds> values = oddsMap.values();
+        for(Odds value : values) {
+            if(value.isSelected()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

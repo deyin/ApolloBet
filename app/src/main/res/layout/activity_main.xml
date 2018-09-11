@@ -25,7 +25,7 @@
         android:layout_height="0dp"
         android:layout_weight="0.01" />
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/layout_bottom_options"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -35,33 +35,41 @@
         android:padding="4dp">
 
         <CheckBox
-            android:id="@+id/cb_auto_refresh"
+            android:id="@+id/cb_auto_select_by_odds"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start|center_vertical"
             android:layout_marginStart="8dp"
             android:checked="false"
-            android:text="@string/strAutoRefresh"
-            android:textAlignment="center" />
-
-        <CheckBox
-            android:id="@+id/cb_auto_select_by_odds"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="8dp"
-            android:checked="true"
             android:text="@string/strAutoSelectByOdds"
             android:textAlignment="center" />
+
+        <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"/>
 
         <CheckBox
             android:id="@+id/cb_auto_select_by_handicap"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_marginEnd="8dp"
-            android:checked="true"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="8dp"
+            android:checked="false"
             android:text="@string/strAutoSelectByHandicap"
             android:textAlignment="center" />
-    </FrameLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"/>
+
+        <CheckBox
+            android:id="@+id/cb_auto_select_by_profit_and_loss"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="8dp"
+            android:checked="false"
+            android:text="@string/strAutoSelectByProfitAndLoss"
+            android:textAlignment="center" />
+    </LinearLayout>
 </LinearLayout>

@@ -1,8 +1,10 @@
 package dylan.io.apollobet.adapters;
 
 import android.content.Context;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
-import android.util.Log;
+import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +14,11 @@ import com.bignerdranch.expandablerecyclerview.ChildViewHolder;
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 import java.util.Map;
 
 import dylan.io.apollobet.R;
+import dylan.io.apollobet.listeners.OnOddsSelectedListener;
 import dylan.io.apollobet.models.Match;
 import dylan.io.apollobet.models.MatchParent;
 import dylan.io.apollobet.models.Odds;
@@ -28,10 +29,15 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
         MatchAdapter.MatchParentViewHolder, MatchAdapter.MatchChildViewHolder> {
 
     private final Context mContext;
+    private final OnOddsSelectedListener mOnOddsSelectedListener;
 
     public MatchAdapter(Context context, @NonNull List<MatchParent> parentList) {
         super(parentList);
         this.mContext = context;
+        if (!(context instanceof OnOddsSelectedListener)) {
+            throw new IllegalArgumentException("The activity of " + context + " should implement interface of OnOddsSelectedListener");
+        }
+        mOnOddsSelectedListener = (OnOddsSelectedListener) context;
     }
 
     @NonNull
@@ -72,7 +78,7 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
         }
     }
 
-    static class MatchChildViewHolder extends ChildViewHolder<Match> {
+    class MatchChildViewHolder extends ChildViewHolder<Match> {
 
         TextView matchInfo;
         TextView vs;
@@ -98,12 +104,58 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
             winOdds = itemView.findViewById(R.id.tv_win_odds);
             drawOdds = itemView.findViewById(R.id.tv_draw_odds);
             loseOdds = itemView.findViewById(R.id.tv_lose_odds);
+
             more = itemView.findViewById(R.id.tv_none_spread_more_odds);
 
             spreadWinOdds = itemView.findViewById(R.id.tv_spread_win_odds);
             spreadDrawOdds = itemView.findViewById(R.id.tv_spread_draw_odds);
             spreadLoseOdds = itemView.findViewById(R.id.tv_spread_lose_odds);
+
             spreadMore = itemView.findViewById(R.id.tv_spread_more_odds);
+        }
+
+        private final class OnOddsClickListener implements View.OnClickListener {
+
+            final Match mMatch;
+
+            public OnOddsClickListener(Match match) {
+                this.mMatch = match;
+            }
+
+            @Override
+            public void onClick(View v) {
+                v.setSelected(!v.isSelected());
+                boolean selected = v.isSelected();
+                OddsType oddsType = getOddsType(v.getId());
+                mOnOddsSelectedListener.onOddsSelected(mMatch, oddsType, selected);
+                v.setBackgroundResource(selected ? R.color.colorOddSelected : R.color.colorOddNotSelected);
+            }
+
+            @Nullable
+            private OddsType getOddsType(@IdRes int id) {
+                OddsType oddsType = null;
+                switch (id) {
+                    case R.id.tv_win_odds:
+                        oddsType = OddsType.WIN;
+                        break;
+                    case R.id.tv_draw_odds:
+                        oddsType = OddsType.DRAW;
+                        break;
+                    case R.id.tv_lose_odds:
+                        oddsType = OddsType.LOSE;
+                        break;
+                    case R.id.tv_spread_win_odds:
+                        oddsType = OddsType.SPREAD_WIN;
+                        break;
+                    case R.id.tv_spread_draw_odds:
+                        oddsType = OddsType.SPREAD_DRAW;
+                        break;
+                    case R.id.tv_spread_lose_odds:
+                        oddsType = OddsType.SPREAD_LOSE;
+                        break;
+                }
+                return oddsType;
+            }
         }
 
         public void onBind(int childPosition, Match match) {
@@ -121,19 +173,32 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
 
         }
 
-        private void setOdds(Match child) {
-            Map<OddsType, Odds> oddsMap = child.getOddsMap();
+        private void setOdds(Match match) {
+            Map<OddsType, Odds> oddsMap = match.getOddsMap();
+
+            OnOddsClickListener onOddsClickListener = new OnOddsClickListener(match);
+
             winOdds.setText(String.valueOf(oddsMap.get(OddsType.WIN)));
+            winOdds.setOnClickListener(onOddsClickListener);
+
             drawOdds.setText(String.valueOf(oddsMap.get(OddsType.DRAW)));
+            drawOdds.setOnClickListener(onOddsClickListener);
+
             loseOdds.setText(String.valueOf(oddsMap.get(OddsType.LOSE)));
+            loseOdds.setOnClickListener(onOddsClickListener);
 
             spreadWinOdds.setText(String.valueOf(oddsMap.get(OddsType.SPREAD_WIN)));
+            spreadWinOdds.setOnClickListener(onOddsClickListener);
+
             spreadDrawOdds.setText(String.valueOf(oddsMap.get(OddsType.SPREAD_DRAW)));
+            spreadDrawOdds.setOnClickListener(onOddsClickListener);
+
             spreadLoseOdds.setText(String.valueOf(oddsMap.get(OddsType.SPREAD_LOSE)));
+            spreadLoseOdds.setOnClickListener(onOddsClickListener);
         }
 
 
-        private static String getDisplayTime(Match match) {
+        private String getDisplayTime(Match match) {
             boolean sameDay = DateUtils.isSameDay(match.getDeadline(), match.getMatchTime());
             return DateUtils.toString("HH:mm",
                     (sameDay ? match.getMatchTime() : match.getDeadline()));
@@ -151,33 +216,4 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
         this.expandParent(0); // default expand the first parent
     }
 
-    public void updateMatchChildren(List<Match> matches) {
-        List<MatchParent> parentList = getParentList();
-        for (Match m : matches) {
-            int parentPosition = -1;
-            int childPosition = -1;
-            int i = 0;
-            for (MatchParent parent : parentList) {
-                List<Match> childList = parent.getChildList();
-                int j = 0;
-                for (Match child : childList) {
-                    if (child.getId().equals(m.getId())) {
-                        childPosition = j;
-                        break;
-                    }
-                    j++;
-                } // end children loop
-                if (childPosition > -1) {
-                    parentPosition = i;
-                    break;
-                }
-                i++;
-            } // end parent loop
-            if (parentPosition > -1) {
-                this.notifyChildChanged(parentPosition, childPosition);
-            } else {
-                Log.w("updateMatchChildren", "Match with number=" + m.getNumber() + " not found!");
-            }
-        }
-    }
 }

@@ -50,7 +50,9 @@
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:divider="@drawable/divider_vertical"
                 android:orientation="vertical"
+                android:showDividers="middle|beginning|end"
                 android:weightSum="2">
 
                 <!-- 1 row, 5 columns WDL labels -->
@@ -58,13 +60,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
+                    android:divider="@drawable/divider_horizontal"
                     android:orientation="horizontal"
-                    android:weightSum="3.691">
+                    android:showDividers="beginning|middle|end"
+                    android:weightSum="3.791">
 
                     <View
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.191"/>
+                        android:layout_weight="0.291"/>
 
                     <TextView
                         android:layout_width="0dp"

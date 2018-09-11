@@ -126,7 +126,7 @@ public class MatchDeserializer extends StdDeserializer<Match> {
 
     private void parseHalfFullOdds(Match match, JsonNode node) {
         JsonNode hafuNode = node.get("hafu");
-        match.setOnSaleHalfFull("Selling".equals(hafuNode.get("p_status").asText()));
+        match.setOnSaleHalfFull(hafuNode != null && "Selling".equals(hafuNode.get("p_status").asText()));
         if (match.getOnSaleHalfFull()) {
             List<OddsType> halfFullTypes = OddsType.getHalfFullTypes();
             for (OddsType halfFullType : halfFullTypes) {
@@ -135,14 +135,14 @@ public class MatchDeserializer extends StdDeserializer<Match> {
                     Log.w("parseHalfFullOdds", halfFullType.getCode() + " value is empty");
                     continue;
                 }
-                match.put(halfFullType, new Odds(jsonNode.asDouble()));
+                match.put(halfFullType, new Odds(halfFullType, jsonNode.asDouble()));
             }
         }
     }
 
     private void parseTotalGoalsOdds(Match match, JsonNode node) {
         JsonNode ttgNode = node.get("ttg");
-        match.setOnSaleTotalGoals("Selling".equals(ttgNode.get("p_status").asText()));
+        match.setOnSaleTotalGoals(ttgNode != null && "Selling".equals(ttgNode.get("p_status").asText()));
         if (match.getOnSaleTotalGoals()) {
             List<OddsType> totalGoalsTypes = OddsType.getTotalGoalsTypes();
             for (OddsType totalGoalsType : totalGoalsTypes) {
@@ -151,14 +151,14 @@ public class MatchDeserializer extends StdDeserializer<Match> {
                     Log.w("parseTotalGoalsOdds", totalGoalsType.getCode() + " value is empty");
                     continue;
                 }
-                match.put(totalGoalsType, new Odds(jsonNode.asDouble()));
+                match.put(totalGoalsType, new Odds(totalGoalsType, jsonNode.asDouble()));
             }
         }
     }
 
     private void parseScoreOdds(Match match, JsonNode node) {
         JsonNode crsNode = node.get("crs");
-        match.setOnSaleScore("Selling".equals(crsNode.get("p_status").asText()));
+        match.setOnSaleScore(crsNode != null && "Selling".equals(crsNode.get("p_status").asText()));
         if (match.getOnSaleScore()) {
             List<OddsType> scoreTypes = OddsType.getScoreTypes();
             for (OddsType scoreType : scoreTypes) {
@@ -167,14 +167,14 @@ public class MatchDeserializer extends StdDeserializer<Match> {
                     Log.w("parseScoreOdds", scoreType.getCode() + " value is empty");
                     continue;
                 }
-                match.put(scoreType, new Odds(jsonNode.asDouble()));
+                match.put(scoreType, new Odds(scoreType, jsonNode.asDouble()));
             }
         }
     }
 
     private void parseSpreadWDLOdds(Match match, JsonNode node) {
         JsonNode hhadNode = node.get("hhad");
-        match.setOnSaleSpread("Selling".equals(hhadNode.get("p_status").asText()));
+        match.setOnSaleSpread(hhadNode != null && "Selling".equals(hhadNode.get("p_status").asText()));
         if (match.getOnSaleSpread()) {
             match.setSpread(hhadNode.get("fixedodds").asInt());
             List<OddsType> spreadWDLTypes = OddsType.getSpreadWDLTypes();
@@ -184,14 +184,14 @@ public class MatchDeserializer extends StdDeserializer<Match> {
                     Log.w("parseSpreadWDLOdds", spreadWDLType.getCode() + " value is empty");
                     continue;
                 }
-                match.put(spreadWDLType, new Odds(jsonNode.asDouble()));
+                match.put(spreadWDLType, new Odds(spreadWDLType, jsonNode.asDouble()));
             }
         }
     }
 
     private void parseWDLOdds(Match match, JsonNode node) {
         JsonNode hadNode = node.get("had");
-        match.setOnSaleNoneSpread("Selling".equals(hadNode.get("p_status").asText()));
+        match.setOnSaleNoneSpread(hadNode != null && "Selling".equals(hadNode.get("p_status").asText()));
         if (match.getOnSaleNoneSpread()) {
             List<OddsType> noneSpreadWDLTypes = OddsType.getNoneSpreadWDLTypes();
             for (OddsType noneSpreadWDLType : noneSpreadWDLTypes) {
@@ -200,7 +200,7 @@ public class MatchDeserializer extends StdDeserializer<Match> {
                     Log.w("parseWDLOdds", noneSpreadWDLType.getCode() + " value is empty");
                     continue;
                 }
-                match.put(noneSpreadWDLType, new Odds(jsonNode.asDouble()));
+                match.put(noneSpreadWDLType, new Odds(noneSpreadWDLType, jsonNode.asDouble()));
             }
         }
     }
