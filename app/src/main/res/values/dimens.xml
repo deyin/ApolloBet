@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="heightOfMatchParent">36dp</dimen>
+    <dimen name="paddingOfMatchParent">4dp</dimen>
+    <dimen name="heightOfMatch">120dp</dimen>
+</resources>

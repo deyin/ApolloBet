@@ -1,8 +1,10 @@
-package dylan.io.apollobet.models;
+package dylan.io.apollobet.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+
+import dylan.io.apollobet.models.Match;
 
 public class MatchParser {
 

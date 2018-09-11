@@ -4,14 +4,15 @@ import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 
@@ -19,6 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,13 +28,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import dylan.io.apollobet.adapters.DividerItemDecoration;
 import dylan.io.apollobet.adapters.MatchAdapter;
 import dylan.io.apollobet.models.Match;
 import dylan.io.apollobet.models.MatchParent;
-import dylan.io.apollobet.models.MatchParser;
+import dylan.io.apollobet.utils.MatchParser;
 import dylan.io.apollobet.utils.DateUtils;
 import dylan.io.apollobet.utils.SSLUtils;
 import dylan.io.apollobet.utils.VolleySingleton;
@@ -40,7 +44,11 @@ import dylan.io.apollobet.utils.VolleySingleton;
 import static java.util.stream.Collectors.groupingBy;
 
 public class MainActivity extends AppCompatActivity
-        implements SwipeRefreshLayout.OnRefreshListener {
+        implements SwipeRefreshLayout.OnRefreshListener,
+        CompoundButton.OnCheckedChangeListener {
+
+    /// Key = 1001(number of the match),Value=Match
+    private Map<Integer, Match> selectedMatches = new ConcurrentHashMap<>();
 
     /// Volley
     private RequestQueue mRequestQueue;
@@ -54,13 +62,16 @@ public class MainActivity extends AppCompatActivity
     private Timer mTimer;
     private TimerTask mTimerTask;
     final Handler mTimerHandler = new Handler();
-    private static long MAX_TARDINESS = 5 * 1000; // 5 minutes
+    private static long MAX_TARDINESS = 5 * 60 * 1000; // 5 minutes
 
+
+    private CheckBox mAutoRefresh;
+    private CheckBox mAutoSelectByOdds;
+    private CheckBox mAutoSelectByHandicap;
 
     @Override
     protected void onResume() {
         super.onResume();
-        startTimer();
     }
 
     @Override
@@ -80,7 +91,7 @@ public class MainActivity extends AppCompatActivity
                 mTimerHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        refreshMatchGroups();
+                        downloadMatchGroups();
                     }
                 });
             }
@@ -108,13 +119,30 @@ public class MainActivity extends AppCompatActivity
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
         mRecyclerView = findViewById(R.id.rv_matches);
-        mAdapter = new MatchAdapter(this, new ArrayList<MatchParent>());
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, R.drawable.recycler_view_divider));
+        mAdapter = new MatchAdapter(this, new ArrayList<>());
         mRecyclerView.setAdapter(mAdapter);
+
+        mAutoRefresh = findViewById(R.id.cb_auto_refresh);
+        mAutoRefresh.setOnCheckedChangeListener(this);
+
+        mAutoSelectByOdds = findViewById(R.id.cb_auto_select_by_odds);
+        mAutoSelectByOdds.setOnCheckedChangeListener(this);
+
+        mAutoSelectByHandicap = findViewById(R.id.cb_auto_select_by_handicap);
+        mAutoSelectByHandicap.setOnCheckedChangeListener(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        downloadMatchGroups();
     }
 
     @Override
     public void onRefresh() {
-        refreshMatchGroups();
+        downloadMatchGroups();
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
@@ -125,17 +153,22 @@ public class MainActivity extends AppCompatActivity
 
         Set<Map.Entry<Date, List<Match>>> entries = matchMap.entrySet();
 
-        for(Map.Entry<Date, List<Match>> entry : entries) {
-            Date key = entry.getKey();
-            List<Match> value = entry.getValue();
+        for (Map.Entry<Date, List<Match>> entry : entries) {
+            Date date = entry.getKey();
+            List<Match> matchList = entry.getValue();
 
-            String strFormattedDate = DateUtils.toString("yyyy/MM/dd", key);
-            StringBuilder title = new StringBuilder();
-            title.append(strFormattedDate).append("\t").append(value.size());
-            MatchParent matchParent = new MatchParent(title.toString(), value);
-
+            String strFormattedDate = DateUtils.toString("yyyy/MM/dd", date);
+            Date dateOfBeforeDays = DateUtils.getDateOfBeforeDays(date, 1);
+            int dayOfWeek = DateUtils.getDayOfWeek(dateOfBeforeDays);
+            String strFormattedTitle = String.format(strFormattedDate + "\t周%d"
+                    + "\t共" + "%2d场比赛", dayOfWeek, matchList.size());
+            Collections.sort(matchList);
+            MatchParent matchParent = new MatchParent(strFormattedTitle, matchList);
+            matchParent.setDate(date);
             matchParents.add(matchParent);
         }
+
+        Collections.sort(matchParents);
 
         return matchParents;
     }
@@ -146,49 +179,49 @@ public class MainActivity extends AppCompatActivity
     /// -H 'Accept: */*'
     /// -H 'Referer: http://www.sporttery.cn/'
     /// -H 'Connection: keep-alive'
-    private void refreshMatchGroups() {
-        String url = "http://i.sporttery.cn/odds_calculator/get_odds?i_format=json&i_callback=getData&poolcode=hhad&poolcode=had";
-        final List<MatchParent> matchParents = new ArrayList<>(128);
+    private void downloadMatchGroups() {
+        String url = "http://i.sporttery.cn/odds_calculator/get_odds?i_format=json&i_callback=getData&poolcode[]=hhad&poolcode[]=had&poolcode[]=crs&poolcode[]=ttg&poolcode[]=hafu";
+        Response.Listener<String> responseListener = response -> {
+            VolleyLog.d("volley.onResponse", response);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                VolleyLog.d("volley.onResponse", response);
+            String json = "{}";
 
-                String json = "{}";
-
-                Pattern PATTERN_GET_DATA = Pattern.compile("getData\\((.*)\\);");
-                Matcher matcher = PATTERN_GET_DATA.matcher(response);
-                if(matcher.find()) {
-                    json = matcher.group(1);
-                }
-                VolleyLog.d("volley.onResponse.json", json);
-
-                List<Match> matches = new ArrayList<>(128);
-                try {
-                    JSONObject jsonObject = new JSONObject(json);
-                    JSONObject data = jsonObject.getJSONObject("data");
-                    JSONArray ids = data.names();
-                    for (int i = 0; i< ids.length(); i++) {
-                        String _id = ids.get(i).toString();
-                        String jsonMatch = data.getString(_id);
-                        Match match = MatchParser.parse(jsonMatch);
-                        matches.add(match);
-                    }
-                } catch (Exception e) {
-                    Log.e("JSONObject", e.getMessage());
-                }
-
-                List<MatchParent> matchParents = groupByDate(matches);
-                mAdapter.updateMatchGroups(matchParents);
+            Pattern PATTERN_GET_DATA = Pattern.compile("getData\\((.*)\\);");
+            Matcher matcher = PATTERN_GET_DATA.matcher(response);
+            if (matcher.find()) {
+                json = matcher.group(1);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.e("volley.onErrorResponse", error);
-            }
-        }) {
+            VolleyLog.d("volley.onResponse.json", json);
 
+            List<Match> matches = new ArrayList<>(128);
+            try {
+                JSONObject jsonObject = new JSONObject(json);
+                JSONObject data = jsonObject.getJSONObject("data");
+                JSONArray ids = data.names();
+                for (int i = 0; i < ids.length(); i++) {
+                    String _id = ids.get(i).toString();
+                    String jsonMatch = data.getString(_id);
+                    Log.d("jsonMatch", "downloadMatchGroups: " + jsonMatch);
+                    Match match = MatchParser.parse(jsonMatch);
+                    matches.add(match);
+                }
+            } catch (Exception e) {
+                Log.e("newJSONObject", e.getMessage());
+            }
+
+            // group by Date(yyyy-MM-dd)
+            List<MatchParent> matchParents = groupByDate(matches);
+
+            // adapter to update data, fire UI refresh
+            mAdapter.updateMatchParent(matchParents, true);
+        };
+
+        Response.ErrorListener errorListener = error -> VolleyLog.e("volley.onErrorResponse", error);
+
+        // http GET request
+        StringRequest stringRequest = new StringRequest(url, responseListener, errorListener) {
+
+            /// fake browser action
             /// -H 'Accept-Language: en-US,en;q=0.9'
             /// -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
             /// -H 'Accept: */*'
@@ -208,5 +241,47 @@ public class MainActivity extends AppCompatActivity
         };
         SSLUtils.disableSslCertificateValidate(); // disable ssl certificate
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(stringRequest);
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        int id = buttonView.getId();
+        switch (id) {
+            case R.id.cb_auto_refresh:
+                onAutoRefreshChecked(buttonView.isChecked());
+                break;
+            case R.id.cb_auto_select_by_odds:
+                onAutoSelectByOdds(buttonView.isChecked());
+                break;
+            case R.id.cb_auto_select_by_handicap:
+                onAutoSelectByHandicap(buttonView.isChecked());
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void onAutoRefreshChecked(boolean checked) {
+        if(checked) {
+            startTimer();
+        } else {
+            cancelTimer();
+        }
+    }
+
+    private void onAutoSelectByOdds(boolean checked) {
+        if(checked) {
+
+        } else {
+
+        }
+    }
+
+    private void onAutoSelectByHandicap(boolean checked) {
+        if(checked) {
+
+        } else {
+
+        }
     }
 }

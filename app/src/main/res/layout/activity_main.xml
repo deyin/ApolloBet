@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="10"
     tools:context=".MainActivity">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        app:layout_constraintBottom_toBottomOf="@+id/layout_bottom_options"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="0dp"
+        android:layout_weight="9.3">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_matches"
@@ -23,41 +20,48 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <LinearLayout
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.01" />
+
+    <FrameLayout
         android:id="@+id/layout_bottom_options"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="#00ff00"
+        android:layout_height="0dp"
+        android:layout_weight="0.69"
+        android:background="@color/colorBottomOptions"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        android:padding="4dp">
 
-
-        <Button
-            android:id="@+id/btn_clear"
-            android:layout_width="0dp"
+        <CheckBox
+            android:id="@+id/cb_auto_refresh"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="0.191"
-            android:background="#f20e0e"
-            android:text="@string/strClear" />
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="8dp"
+            android:checked="false"
+            android:text="@string/strAutoRefresh"
+            android:textAlignment="center" />
 
-        <TextView
-            android:layout_width="0dp"
+        <CheckBox
+            android:id="@+id/cb_auto_select_by_odds"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="0.618"
-            android:background="#837f7a" />
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="8dp"
+            android:checked="true"
+            android:text="@string/strAutoSelectByOdds"
+            android:textAlignment="center" />
 
-        <Button
-            android:layout_width="0dp"
+        <CheckBox
+            android:id="@+id/cb_auto_select_by_handicap"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="0.191"
-            android:background="#09c909"
-            android:text="@string/strConfirm" />
-
-
-    </LinearLayout>
-
-
-</android.support.constraint.ConstraintLayout>
+            android:layout_gravity="center"
+            android:layout_marginEnd="8dp"
+            android:checked="true"
+            android:text="@string/strAutoSelectByHandicap"
+            android:textAlignment="center" />
+    </FrameLayout>
+</LinearLayout>
