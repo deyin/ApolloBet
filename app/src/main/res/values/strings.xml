@@ -9,5 +9,5 @@
     <string name="strAutoRefresh">自动刷新</string>
     <string name="strAutoSelectByOdds">根据赔率自选</string>
     <string name="strAutoSelectByHandicap">根据盘口自选</string>
-    <string name="strAutoSelectByProfitAndLoss">根据盈亏自择</string>
+    <string name="strAutoSelectByProfitAndLoss">根据盈亏自选</string>
 </resources>

@@ -5,20 +5,21 @@
     <color name="colorAccent">#FF4081</color>
 
 
+    <color name="colorMatchInfo">#dae1e1</color>
     <color name="colorMatchParent">#e7eded</color>
     <color name="colorArrow">#a0a5a6</color>
     <color name="colorWin">#ffffff</color>
     <color name="colorDraw">#ffffff</color>
     <color name="colorLose">#ffffff</color>
-    <color name="colorTableDivider">#e7eded</color>
+    <color name="colorTableDivider">#c3c9c9</color>
 
     <color name="colorPositiveSpread">#a2f484</color>
-    <color name="colorNegativeSpread">#efc5d7</color>
+    <color name="colorNegativeSpread">#fcac7b</color>
     <color name="colorSelectedMatchNotice">#a9a5a5</color>
     <color name="colorTextOfBtnConfirm">#ffffff</color>
     <color name="colorBtnClear">#717070</color>
     <color name="colorTextOfBtnClear">#ffffff</color>
     <color name="colorBottomOptions">#cacacf</color>
-    <color name="colorOddSelected">#f21023</color>
+    <color name="colorOddSelected">#f94c5b</color>
     <color name="colorOddNotSelected">#ffffff</color>
 </resources>

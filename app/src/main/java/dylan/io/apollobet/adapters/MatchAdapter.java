@@ -8,6 +8,7 @@ import android.support.annotation.RawRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bignerdranch.expandablerecyclerview.ChildViewHolder;
@@ -93,7 +94,6 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
         TextView spreadLoseOdds;
 
         TextView more;
-        TextView spreadMore;
 
         public MatchChildViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -105,13 +105,11 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
             drawOdds = itemView.findViewById(R.id.tv_draw_odds);
             loseOdds = itemView.findViewById(R.id.tv_lose_odds);
 
-            more = itemView.findViewById(R.id.tv_none_spread_more_odds);
-
             spreadWinOdds = itemView.findViewById(R.id.tv_spread_win_odds);
             spreadDrawOdds = itemView.findViewById(R.id.tv_spread_draw_odds);
             spreadLoseOdds = itemView.findViewById(R.id.tv_spread_lose_odds);
 
-            spreadMore = itemView.findViewById(R.id.tv_spread_more_odds);
+            more = itemView.findViewById(R.id.tv_more_odds);
         }
 
         private final class OnOddsClickListener implements View.OnClickListener {
@@ -163,7 +161,7 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
                     + "\n" + match.getLeagueShortName()
                     + "\n" + getDisplayTime(match));
             vs.setText(match.getHostTeamShortName() + match.getHostLeagueOrder()
-                    + "vs" + match.getAwayTeamShortName() + match.getAwayLeagueOrder());
+                    + " vs " + match.getAwayTeamShortName() + match.getAwayLeagueOrder());
 
             spread.setText(match.getSpread() > 0 ? String.format("+%d", match.getSpread()) : String.valueOf(match.getSpread()));
             spread.setBackgroundResource(match.getSpread() > 0 ?

@@ -217,7 +217,8 @@ public class MainActivity extends AppCompatActivity
                     mAdapter.updateMatchParent(matchParents, true);
                 } else {
                     Log.i("updateMatchParent", "No odds updated since last update time: " + strLastUpdated);
-                    Toast.makeText(MainActivity.this, "No odds updated since " + strLastUpdated, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "暂时没有新的数据,上次更新时间:"
+                            + DateUtils.toString("HH:mm", lastUpdatedDate), Toast.LENGTH_SHORT).show();
                 }
 
             } catch (Exception e) {
@@ -279,7 +280,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void onAutoSelectByHandicap(boolean checked) {
+    private void onAutoSelectByHandicap(boolean checked) { // TODO
         if (checked) {
 
         } else {
@@ -287,7 +288,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void onAutoSelectByProfitAndLoss(boolean checked) {
+    private void onAutoSelectByProfitAndLoss(boolean checked) { // TODO
         if (checked) {
 
         } else {
@@ -300,17 +301,17 @@ public class MainActivity extends AppCompatActivity
         final Map<OddsType, Odds> oddsMap = match.getOddsMap();
         oddsMap.get(oddsType).setSelected(selected);
 
-        if(selected) {
+        if (selected) {
             selectedMatches.putIfAbsent(match.getId(), match);
-        } else if(selectedMatches.containsKey(match.getId()) && noneOfOddsSelected(oddsMap)){
-             selectedMatches.remove(match.getId());
+        } else if (selectedMatches.containsKey(match.getId()) && noneOfOddsSelected(oddsMap)) {
+            selectedMatches.remove(match.getId());
         }
     }
 
     private boolean noneOfOddsSelected(Map<OddsType, Odds> oddsMap) {
-        Collection<Odds> values = oddsMap.values();
-        for(Odds value : values) {
-            if(value.isSelected()) {
+        Collection<Odds> oddsList = oddsMap.values();
+        for (Odds odds : oddsList) {
+            if (odds.isSelected()) {
                 return false;
             }
         }

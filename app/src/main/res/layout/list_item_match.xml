@@ -3,220 +3,307 @@
     android:layout_width="match_parent"
     android:layout_height="128dp"
     android:orientation="horizontal"
-    android:padding="8dp"
+    android:padding="4dp"
     android:weightSum="1">
 
+    <!-- left match info -->
     <LinearLayout
+        android:id="@+id/left_layout"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.191">
+        android:layout_weight="0.2"
+        android:background="@color/colorMatchInfo">
 
         <TextView
             android:id="@+id/tv_match_info"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorMatchParent"
             android:gravity="center"
-            android:text="008" />
+            android:text="008"
+            android:textAlignment="center" />
 
     </LinearLayout>
+    <!-- //left match info -->
 
+    <!-- right vs and odds -->
     <LinearLayout
+        android:id="@+id/right_layout"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.809"
+        android:layout_weight="0.8"
+        android:background="@color/colorMatchParent"
         android:orientation="vertical"
         android:weightSum="1">
 
+        <!-- right top vs -->
         <LinearLayout
+            android:id="@+id/right_layout_top"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.191">
+            android:layout_weight="0.2">
 
             <TextView
                 android:id="@+id/tv_vs"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:text="Man vs LivePool" />
+                android:text="Man vs LivePool"
+                android:textAlignment="center" />
 
         </LinearLayout>
 
+        <!-- remaining left of spread, center of odds right of more -->
         <LinearLayout
+            android:id="@+id/right_layout_remaining"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.191">
+            android:layout_weight="0.8"
+            android:orientation="horizontal"
+            android:weightSum="1">
 
+            <!-- left of spread -->
             <TableLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_weight="0.07"
+                android:divider="@drawable/divider_vertical"
+                android:orientation="vertical"
+                android:showDividers="middle|end"
+                android:weightSum="1">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.2"
+                    android:orientation="horizontal"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:id="@+id/tv_placeholder"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:textAlignment="center" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.4"
+                    android:divider="@drawable/divider_horizontal"
+                    android:orientation="horizontal"
+                    android:showDividers="beginning|middle"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:id="@+id/tv_none_spread"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textAlignment="center" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.4"
+                    android:divider="@drawable/divider_horizontal"
+                    android:orientation="horizontal"
+                    android:showDividers="beginning|middle"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:id="@+id/tv_spread"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="-1"
+                        android:textAlignment="center" />
+
+                </TableRow>
+            </TableLayout>
+            <!-- //left of spread -->
+
+            <!-- center odds -->
+            <TableLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.75"
                 android:divider="@drawable/divider_vertical"
                 android:orientation="vertical"
                 android:showDividers="middle|beginning|end"
-                android:weightSum="2">
+                android:weightSum="1">
 
-                <!-- 1 row, 5 columns WDL labels -->
+                <!--win/draw/lose label -->
+                <TableRow
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.2"
+                    android:divider="@drawable/divider_horizontal"
+                    android:orientation="horizontal"
+                    android:showDividers="beginning|middle|end"
+                    android:weightSum="9">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="@string/win"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="@string/draw"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="@string/lose"
+                        android:textAlignment="center" />
+                </TableRow>
+
+                <!--win/draw/lose odds -->
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.4"
+                    android:background="@color/colorOddNotSelected"
+                    android:divider="@drawable/divider_horizontal"
+                    android:orientation="horizontal"
+                    android:showDividers="beginning|middle|end"
+                    android:weightSum="9">
+
+                    <TextView
+                        android:id="@+id/tv_win_odds"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="0.1"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:id="@+id/tv_draw_odds"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="0.2"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:id="@+id/tv_lose_odds"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="0.3"
+                        android:textAlignment="center" />
+                </TableRow>
+
+                <!--spread win/draw/lose odds -->
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.4"
+                    android:background="@color/colorOddNotSelected"
+                    android:divider="@drawable/divider_horizontal"
+                    android:orientation="horizontal"
+                    android:showDividers="beginning|middle|end"
+                    android:weightSum="9">
+
+                    <TextView
+                        android:id="@+id/tv_spread_win_odds"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="0.4"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:id="@+id/tv_spread_draw_odds"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="0.5"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:id="@+id/tv_spread_lose_odds"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="center"
+                        android:text="0.6"
+                        android:textAlignment="center" />
+                </TableRow>
+            </TableLayout>
+            <!-- //center of odds -->
+
+            <!-- right of more -->
+            <TableLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.18"
+                android:divider="@drawable/divider_vertical"
+                android:orientation="vertical"
+                android:showDividers="middle|beginning|end"
+                android:weightSum="1">
+
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:divider="@drawable/divider_horizontal"
                     android:orientation="horizontal"
-                    android:showDividers="beginning|middle|end"
-                    android:weightSum="3.791">
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.291"/>
+                    android:showDividers="middle|end"
+                    android:weightSum="1">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:id="@+id/tv_more_odds"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_gravity="center"
                         android:layout_weight="1"
-                        android:background="@color/colorWin"
-                        android:gravity="center"
-                        android:text="@string/win" />
+                        android:drawablePadding="-16dp"
+                        android:drawableRight="@drawable/ic_keyboard_arrow_right"
+                        android:gravity="start|center_vertical"
+                        android:text="@string/more"
+                        android:textAlignment="center" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@color/colorDraw"
-                        android:gravity="center"
-                        android:text="@string/draw" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@color/colorLose"
-                        android:gravity="center"
-                        android:text="@string/lose" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.5"/>
                 </TableRow>
+
             </TableLayout>
+            <!-- //right of more -->
 
         </LinearLayout>
-
-        <!-- 2 rows, 5 columns -->
-        <TableLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.618"
-            android:divider="@drawable/divider_vertical"
-            android:orientation="vertical"
-            android:showDividers="middle|beginning|end"
-            android:weightSum="2">
-
-            <!-- row 1 -->
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:divider="@drawable/divider_horizontal"
-                android:orientation="horizontal"
-                android:showDividers="beginning|middle|end"
-                android:weightSum="3.791">
-
-                <TextView
-                    android:id="@+id/tv_none_spread"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.291"
-                    android:gravity="center"
-                    android:text="0" />
-
-                <TextView
-                    android:id="@+id/tv_win_odds"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="1.67" />
-
-                <TextView
-                    android:id="@+id/tv_draw_odds"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="3.45" />
-
-                <TextView
-                    android:id="@+id/tv_lose_odds"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="4.62" />
-
-                <TextView
-                    android:id="@+id/tv_none_spread_more_odds"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.5"
-                    android:gravity="center"
-                    android:text="@string/more" />
-            </TableRow>
-
-            <!-- row 2 -->
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:divider="@drawable/divider_horizontal"
-                android:orientation="horizontal"
-                android:showDividers="beginning|middle|end"
-                android:weightSum="3.791">
-
-                <TextView
-                    android:id="@+id/tv_spread"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.291"
-                    android:gravity="center"
-                    android:text="-1" />
-
-                <TextView
-                    android:id="@+id/tv_spread_win_odds"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="3.27" />
-
-                <TextView
-                    android:id="@+id/tv_spread_draw_odds"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="4.53" />
-
-                <TextView
-                    android:id="@+id/tv_spread_lose_odds"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="1.69" />
-
-                <TextView
-                    android:id="@+id/tv_spread_more_odds"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.5"
-                    android:gravity="center"
-                    android:text="@string/more" />
-            </TableRow>
-
-        </TableLayout>
-
+        <!-- //remaining spread &odds &more -->
     </LinearLayout>
-
+    <!-- //right vs and odds -->
 </LinearLayout>
