@@ -8,6 +8,8 @@ public class Odds {
 
     private boolean selected = false;
 
+    public Odds(){}
+
     public Odds(OddsType type, Double value) {
         this.type = type;
         this.value = value;

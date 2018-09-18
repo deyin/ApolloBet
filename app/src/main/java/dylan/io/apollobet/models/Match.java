@@ -1,54 +1,105 @@
 package dylan.io.apollobet.models;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+import android.arch.persistence.room.TypeConverter;
+import android.arch.persistence.room.TypeConverters;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import dylan.io.apollobet.utils.DateUtils;
 import dylan.io.apollobet.utils.MatchDeserializer;
 
 @JsonDeserialize(using = MatchDeserializer.class)
+@Entity(tableName = "t_match")
 public class Match implements Comparable<Match> {
 
-    private int parentPosition = -1;
-
+    @ColumnInfo(name = "id")
+    @NonNull
+    @PrimaryKey
     private String id;
 
+    @ColumnInfo(name = "number")
     private String number;
 
+    @ColumnInfo(name = "match_time")
     private Date matchTime;
 
+    @ColumnInfo(name = "deadline")
     private Date deadline;
 
+    @ColumnInfo(name = "b_on_sale")
     private Boolean onSale;
+
+    @ColumnInfo(name = "b_on_sale_none_spread")
     private Boolean onSaleNoneSpread;
+
+    @ColumnInfo(name = "b_on_sale_spread")
     private Boolean onSaleSpread;
+
+    @ColumnInfo(name = "b_on_sale_score")
     private Boolean onSaleScore;
+
+    @ColumnInfo(name = "b_on_sale_total_goals")
     private Boolean onSaleTotalGoals;
+
+    @ColumnInfo(name = "b_on_sale_half_full")
     private Boolean onSaleHalfFull;
 
+    @ColumnInfo(name = "b_hot_match")
     private Boolean hot;
 
+    @ColumnInfo(name = "league_id")
     private String leagueId;
+
+    @ColumnInfo(name = "league_name")
     private String leagueName;
+
+    @ColumnInfo(name = "league_short_name")
     private String leagueShortName;
 
-
+    @ColumnInfo(name = "host_team_id")
     private String hostTeamId;
+
+    @ColumnInfo(name = "host_team_name")
     private String hostTeamName;
+
+    @ColumnInfo(name = "host_team_short_name")
     private String hostTeamShortName;
+
+    @ColumnInfo(name = "host_league_order")
     private String hostLeagueOrder;
 
+    @ColumnInfo(name = "away_team_id")
     private String awayTeamId;
+
+    @ColumnInfo(name = "away_team_name")
     private String awayTeamName;
+
+    @ColumnInfo(name = "away_team_short_name")
     private String awayTeamShortName;
+
+    @ColumnInfo(name = "away_league_order")
     private String awayLeagueOrder;
 
+    @ColumnInfo(name = "spread")
     private int spread = 0; // default
 
+    @ColumnInfo(name = "odds_map")
+    @TypeConverters({OddsMapConverter.class})
     private Map<OddsType, Odds> oddsMap = new HashMap<>();
 
     public String getId() {
@@ -243,16 +294,9 @@ public class Match implements Comparable<Match> {
         this.awayLeagueOrder = awayLeagueOrder;
     }
 
+
     public void put(OddsType type, Odds odds) {
         oddsMap.put(type, odds);
-    }
-
-    public int getParentPosition() {
-        return parentPosition;
-    }
-
-    public void setParentPosition(int parentPosition) {
-        this.parentPosition = parentPosition;
     }
 
     @Override
@@ -284,4 +328,33 @@ public class Match implements Comparable<Match> {
     public int compareTo(@NonNull Match o) {
         return this.matchTime.compareTo(o.matchTime);
     }
+
+
+    public static class OddsMapConverter {
+
+        private static ObjectMapper objectMapper = new ObjectMapper();
+
+        @TypeConverter
+        public static Map<OddsType, Odds> jsonToMap(String json) {
+            try {
+                return objectMapper.readValue(json, new TypeReference<Map<OddsType, Odds>>() {
+                });
+            } catch (IOException e) {
+                Log.e("jsonToMap", e.getMessage() );
+            }
+
+            return new HashMap<>();
+        }
+
+        @TypeConverter
+        public static String mapToJson(Map<OddsType, Odds> map) {
+            try {
+                return objectMapper.writeValueAsString(map);
+            } catch (JsonProcessingException e) {
+                Log.e("mapToJson", e.getMessage() );
+            }
+            return "{}";
+        }
+    }
+
 }

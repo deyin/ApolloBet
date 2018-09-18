@@ -208,7 +208,7 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
         }
     }
 
-    public void updateMatchParent(List<MatchParent> matchParents, boolean preserveExpansionState) {
+    public void setMatchParents(List<MatchParent> matchParents, boolean preserveExpansionState) {
 
         this.getParentList().clear();
 

@@ -30,6 +30,10 @@ public final class DateUtils {
         return new Date(date.getTime() - 24 * 60 * 60 * 1000 * beforeDays);
     }
 
+    public static Date getDateOfAfterDays(@NonNull final Date date, int beforeDays) {
+        return new Date(date.getTime() + 24 * 60 * 60 * 1000 * beforeDays);
+    }
+
     public static int getDayOfWeek(@NonNull Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
