@@ -4,17 +4,16 @@ import android.content.Context;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RawRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bignerdranch.expandablerecyclerview.ChildViewHolder;
 import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -124,36 +123,38 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
             public void onClick(View v) {
                 v.setSelected(!v.isSelected());
                 boolean selected = v.isSelected();
-                OddsType oddsType = getOddsType(v.getId());
+                OddsType oddsType = getOddsTypeByResId(v.getId());
                 mOnOddsSelectedListener.onOddsSelected(mMatch, oddsType, selected);
                 v.setBackgroundResource(selected ? R.color.colorOddSelected : R.color.colorOddNotSelected);
             }
 
-            @Nullable
-            private OddsType getOddsType(@IdRes int id) {
-                OddsType oddsType = null;
-                switch (id) {
-                    case R.id.tv_win_odds:
-                        oddsType = OddsType.WIN;
-                        break;
-                    case R.id.tv_draw_odds:
-                        oddsType = OddsType.DRAW;
-                        break;
-                    case R.id.tv_lose_odds:
-                        oddsType = OddsType.LOSE;
-                        break;
-                    case R.id.tv_spread_win_odds:
-                        oddsType = OddsType.SPREAD_WIN;
-                        break;
-                    case R.id.tv_spread_draw_odds:
-                        oddsType = OddsType.SPREAD_DRAW;
-                        break;
-                    case R.id.tv_spread_lose_odds:
-                        oddsType = OddsType.SPREAD_LOSE;
-                        break;
-                }
-                return oddsType;
+
+        }
+
+        @Nullable
+        private OddsType getOddsTypeByResId(@IdRes int resId) {
+            OddsType oddsType = null;
+            switch (resId) {
+                case R.id.tv_win_odds:
+                    oddsType = OddsType.WIN;
+                    break;
+                case R.id.tv_draw_odds:
+                    oddsType = OddsType.DRAW;
+                    break;
+                case R.id.tv_lose_odds:
+                    oddsType = OddsType.LOSE;
+                    break;
+                case R.id.tv_spread_win_odds:
+                    oddsType = OddsType.SPREAD_WIN;
+                    break;
+                case R.id.tv_spread_draw_odds:
+                    oddsType = OddsType.SPREAD_DRAW;
+                    break;
+                case R.id.tv_spread_lose_odds:
+                    oddsType = OddsType.SPREAD_LOSE;
+                    break;
             }
+            return oddsType;
         }
 
         public void onBind(int childPosition, Match match) {
@@ -167,34 +168,38 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
             spread.setBackgroundResource(match.getSpread() > 0 ?
                     R.color.colorPositiveSpread : R.color.colorNegativeSpread);
 
-            setOdds(match);
+            onBindOddsViews(Arrays.asList(new TextView[]{
+                    winOdds,
+                    drawOdds,
+                    loseOdds,
+
+                    spreadWinOdds,
+                    spreadDrawOdds,
+                    spreadLoseOdds
+            }), match);
 
         }
 
-        private void setOdds(Match match) {
-            Map<OddsType, Odds> oddsMap = match.getOddsMap();
-
+        private void onBindOddsViews(@NonNull List<TextView> oddsViews, @NonNull Match match) {
             OnOddsClickListener onOddsClickListener = new OnOddsClickListener(match);
 
-            winOdds.setText(String.valueOf(oddsMap.get(OddsType.WIN)));
-            winOdds.setOnClickListener(onOddsClickListener);
-
-            drawOdds.setText(String.valueOf(oddsMap.get(OddsType.DRAW)));
-            drawOdds.setOnClickListener(onOddsClickListener);
-
-            loseOdds.setText(String.valueOf(oddsMap.get(OddsType.LOSE)));
-            loseOdds.setOnClickListener(onOddsClickListener);
-
-            spreadWinOdds.setText(String.valueOf(oddsMap.get(OddsType.SPREAD_WIN)));
-            spreadWinOdds.setOnClickListener(onOddsClickListener);
-
-            spreadDrawOdds.setText(String.valueOf(oddsMap.get(OddsType.SPREAD_DRAW)));
-            spreadDrawOdds.setOnClickListener(onOddsClickListener);
-
-            spreadLoseOdds.setText(String.valueOf(oddsMap.get(OddsType.SPREAD_LOSE)));
-            spreadLoseOdds.setOnClickListener(onOddsClickListener);
+            for (TextView oddsView : oddsViews) {
+                Map<OddsType, Odds> oddsMap = match.getOddsMap();
+                int id = oddsView.getId();
+                OddsType oddsType = getOddsTypeByResId(id);
+                Odds odds = oddsMap.get(oddsType);
+                if (odds == null) { // without handicap
+                    oddsView.setText("未受注");
+                    oddsView.setEnabled(false);
+                    oddsView.setBackgroundResource(R.color.colorOddDisabled);
+                } else {
+                    oddsView.setEnabled(true);
+                    oddsView.setText(String.valueOf(odds.getValue()));
+                    oddsView.setOnClickListener(onOddsClickListener);
+                    oddsView.setBackgroundResource(R.color.colorOddNotSelected);
+                }
+            }
         }
-
 
         private String getDisplayTime(Match match) {
             boolean sameDay = DateUtils.isSameDay(match.getDeadline(), match.getMatchTime());

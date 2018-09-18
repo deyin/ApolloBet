@@ -22,4 +22,5 @@
     <color name="colorBottomOptions">#cacacf</color>
     <color name="colorOddSelected">#f94c5b</color>
     <color name="colorOddNotSelected">#ffffff</color>
+    <color name="colorOddDisabled">#e6e6e7</color>
 </resources>
