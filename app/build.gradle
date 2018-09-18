@@ -32,11 +32,24 @@ dependencies {
 
     implementation 'com.android.support:recyclerview-v7:27.1.1'
 
-    implementation 'com.bignerdranch.android:expandablerecyclerview:3.0.0-RC1'
+    // expandable view
+    implementation "com.bignerdranch.android:expandablerecyclerview:$rootProject.expandablerecyclerviewVersion"
 
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.9.6'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.9.6'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.6'
+    // jackson serialize/deserialize
+    implementation "com.fasterxml.jackson.core:jackson-core:$rootProject.jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$rootProject.jacksonVersion"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$rootProject.jacksonVersion"
 
-    implementation 'com.android.volley:volley:1.1.1'
+    // volley network
+    implementation "com.android.volley:volley:$rootProject.volleyVersion"
+
+    // Room components
+    implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
+    annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
+    androidTestImplementation "android.arch.persistence.room:testing:$rootProject.roomVersion"
+
+    // Lifecycle components
+    implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
+    annotationProcessor "android.arch.lifecycle:compiler:$rootProject.archLifecycleVersion"
 }
+

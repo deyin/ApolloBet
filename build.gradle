@@ -25,3 +25,11 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+ext {
+    volleyVersion = '1.1.1'
+    expandablerecyclerviewVersion = '3.0.0-RC1'
+    jacksonVersion = '2.9.6'
+    roomVersion = '1.1.1'
+    archLifecycleVersion = '1.1.1'
+}
