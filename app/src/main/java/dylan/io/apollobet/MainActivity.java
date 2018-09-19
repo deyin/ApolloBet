@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -98,10 +99,19 @@ public class MainActivity extends AppCompatActivity
 
     private void initMatchViewModel() {
         mMatchViewModel = ViewModelProviders.of(this).get(MatchViewModel.class);
-        Date now = new Date();
-        Date daysBefore = DateUtils.getDateOfBeforeDays(now, 1);
-        Date daysAfter = DateUtils.getDateOfAfterDays(now, 2);
-        mMatchViewModel.getMatchesByDate(daysBefore, daysAfter).observe(this, new Observer<List<Match>>() {
+
+        Calendar calendar = Calendar.getInstance(); // today
+
+        Date todayStart = DateUtils.getStartOfDate(calendar);
+        Date todayEnd = DateUtils.getEndOfDate(calendar);
+
+        // yesterday matches
+        Date yesterday = DateUtils.getDateOfBeforeDays(todayStart, 1);
+
+        // after days matches
+        Date afterDays = DateUtils.getDateOfAfterDays(todayEnd, 2);
+
+        mMatchViewModel.getMatchesByDate(yesterday, afterDays).observe(this, new Observer<List<Match>>() {
             @Override
             public void onChanged(@Nullable List<Match> matches) {
 
@@ -172,10 +182,8 @@ public class MainActivity extends AppCompatActivity
             List<Match> matchList = entry.getValue();
 
             String strFormattedDate = DateUtils.toString("yyyy/MM/dd", date);
-            Date dateOfBeforeDays = DateUtils.getDateOfBeforeDays(date, 1);
-            int dayOfWeek = DateUtils.getDayOfWeek(dateOfBeforeDays);
-            String strFormattedTitle = String.format(strFormattedDate + "\t周%d"
-                    + "\t共" + "%2d场比赛", dayOfWeek, matchList.size());
+            int dayOfWeek = DateUtils.getDayOfWeek(date);
+            String strFormattedTitle = String.format(strFormattedDate + "\t周%d" + "\t共" + "%2d场比赛", dayOfWeek, matchList.size());
             Collections.sort(matchList);
             MatchParent matchParent = new MatchParent(strFormattedTitle, matchList);
             matchParent.setDate(date);

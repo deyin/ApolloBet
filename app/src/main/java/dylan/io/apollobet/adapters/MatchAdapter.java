@@ -14,6 +14,8 @@ import com.bignerdranch.expandablerecyclerview.ExpandableRecyclerAdapter;
 import com.bignerdranch.expandablerecyclerview.ParentViewHolder;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -160,7 +162,7 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
         public void onBind(int childPosition, Match match) {
             matchInfo.setText(match.getNumber()
                     + "\n" + match.getLeagueShortName()
-                    + "\n" + getDisplayTime(match));
+                    + "\n" + getDeadlineDisplayTime(match));
             vs.setText(match.getHostTeamShortName() + match.getHostLeagueOrder()
                     + " vs " + match.getAwayTeamShortName() + match.getAwayLeagueOrder());
 
@@ -201,10 +203,14 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
             }
         }
 
-        private String getDisplayTime(Match match) {
-            boolean sameDay = DateUtils.isSameDay(match.getDeadline(), match.getMatchTime());
-            return DateUtils.toString("HH:mm",
-                    (sameDay ? match.getMatchTime() : match.getDeadline()));
+        private String getDeadlineDisplayTime(Match match) {
+            Date deadline = match.getDeadline();
+            Calendar calendarOfDeadline = DateUtils.getCalendarOfDate(deadline);
+            Date start = DateUtils.getStartOfDate(calendarOfDeadline);
+            Date end = DateUtils.getEndOfDate(calendarOfDeadline);
+            Date matchTime = match.getMatchTime();
+            boolean matchOfToday = start.before(matchTime) && end.after(matchTime);
+            return DateUtils.toString("HH:mm", (matchOfToday ? matchTime : deadline));
         }
     }
 
@@ -216,7 +222,11 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
 
         this.notifyParentDataSetChanged(preserveExpansionState);
 
-        this.expandParent(0); // default expand the first parent
+        int parentPosition = getParentList().size() - 2; // second reversed
+        if(parentPosition < 0) {
+            parentPosition = 0;
+        }
+        this.expandParent(parentPosition); // default expand the first parent
     }
 
 }

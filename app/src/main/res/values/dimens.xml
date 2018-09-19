@@ -3,4 +3,5 @@
     <dimen name="heightOfMatchParent">36dp</dimen>
     <dimen name="paddingOfMatchParent">4dp</dimen>
     <dimen name="heightOfMatch">120dp</dimen>
+    <dimen name="textSizeOfSpread">12sp</dimen>
 </resources>

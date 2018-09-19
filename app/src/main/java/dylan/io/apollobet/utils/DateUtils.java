@@ -30,8 +30,30 @@ public final class DateUtils {
         return new Date(date.getTime() - 24 * 60 * 60 * 1000 * beforeDays);
     }
 
-    public static Date getDateOfAfterDays(@NonNull final Date date, int beforeDays) {
-        return new Date(date.getTime() + 24 * 60 * 60 * 1000 * beforeDays);
+    public static Date getDateOfAfterDays(@NonNull final Date date, int afterDays) {
+        return new Date(date.getTime() + 24 * 60 * 60 * 1000 * afterDays);
+    }
+
+    public static Date getStartOfDate(@NonNull final Calendar calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        return calendar.getTime();
+    }
+
+    public static Calendar getCalendarOfDate(@NonNull Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar;
+    }
+
+    public static Date getEndOfDate(@NonNull final Calendar calendar) {
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+
+        return calendar.getTime();
     }
 
     public static int getDayOfWeek(@NonNull Date date) {
