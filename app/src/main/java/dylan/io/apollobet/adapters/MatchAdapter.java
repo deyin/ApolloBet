@@ -4,9 +4,11 @@ import android.content.Context;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bignerdranch.expandablerecyclerview.ChildViewHolder;
@@ -82,6 +84,8 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
 
     class MatchChildViewHolder extends ChildViewHolder<Match> {
 
+        LinearLayout mMatch;
+
         TextView matchInfo;
         TextView vs;
         TextView spread;
@@ -98,6 +102,9 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
 
         public MatchChildViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            mMatch = itemView.findViewById(R.id.layout_match);
+
             matchInfo = itemView.findViewById(R.id.tv_match_info);
             vs = itemView.findViewById(R.id.tv_vs);
             spread = itemView.findViewById(R.id.tv_spread);
@@ -160,9 +167,15 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
         }
 
         public void onBind(int childPosition, Match match) {
-            matchInfo.setText(match.getNumber()
-                    + "\n" + match.getLeagueShortName()
-                    + "\n" + getDeadlineDisplayTime(match));
+
+            mMatch.setBackgroundResource(match.expired() ? R.color.colorMatchExpired : R.color.colorMatchNotExpired);
+
+            String text = match.getNumber()
+                    + "<br/>" + match.getLeagueShortName()
+                    + "<br/>" + getDeadlineDisplayTime(match)
+                    + "<br/>" + (match.expired() ? (match.ongoing() ? "<font color=\"yellow\">进行中</font>" : "<font color=\"red\">已结束</font>") : "<font color=\"green\">未开赛</font>");
+            matchInfo.setText(Html.fromHtml(text));
+
             vs.setText(match.getHostTeamShortName() + match.getHostLeagueOrder()
                     + " vs " + match.getAwayTeamShortName() + match.getAwayLeagueOrder());
 
@@ -216,17 +229,35 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
 
     public void setMatchParents(List<MatchParent> matchParents, boolean preserveExpansionState) {
 
-        this.getParentList().clear();
+        List<MatchParent> parentList = getParentList();
 
-        this.getParentList().addAll(matchParents);
+        parentList.clear();
 
-        this.notifyParentDataSetChanged(preserveExpansionState);
+        parentList.addAll(matchParents);
 
-        int parentPosition = getParentList().size() - 2; // second reversed
-        if(parentPosition < 0) {
-            parentPosition = 0;
+        notifyParentDataSetChanged(preserveExpansionState);
+
+        expandAtLatestMatch(parentList);
+    }
+
+    private void expandAtLatestMatch(@NonNull List<MatchParent> parentList) {
+        Date date = new Date();
+        int pos = 0;
+        for(MatchParent parent : parentList) {
+            List<Match> matches = parent.getMatches();
+            boolean flag = false;
+            for(Match m : matches) {
+                if(date.before(m.getMatchTime())) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(flag) {
+                break;
+            }
+            pos++;
         }
-        this.expandParent(parentPosition); // default expand the first parent
+        this.expandParent(pos);
     }
 
 }

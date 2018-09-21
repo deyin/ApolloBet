@@ -11,15 +11,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -106,7 +110,7 @@ public class MainActivity extends AppCompatActivity
         Date todayEnd = DateUtils.getEndOfDate(calendar);
 
         // yesterday matches
-        Date yesterday = DateUtils.getDateOfBeforeDays(todayStart, 1);
+        Date yesterday = DateUtils.getDateOfBeforeHours(todayStart, 12);
 
         // after days matches
         Date afterDays = DateUtils.getDateOfAfterDays(todayEnd, 2);
@@ -115,7 +119,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChanged(@Nullable List<Match> matches) {
 
-                List<MatchParent> matchParents = groupByDate(matches);
+                List<MatchParent> matchParents = generateMatchParents(matches);
 
                 if (matchParents == null || matchParents.isEmpty()) {
                     return;
@@ -170,10 +174,10 @@ public class MainActivity extends AppCompatActivity
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
-    private List<MatchParent> groupByDate(List<Match> matches) {
+    private List<MatchParent> generateMatchParents(List<Match> matches) {
         List<MatchParent> matchParents = new ArrayList<>();
 
-        Map<Date, List<Match>> matchMap = matches.stream().collect(groupingBy(Match::getDeadline));
+        Map<Date, List<Match>> matchMap = groupByDate(matches);
 
         Set<Map.Entry<Date, List<Match>>> entries = matchMap.entrySet();
 
@@ -182,8 +186,8 @@ public class MainActivity extends AppCompatActivity
             List<Match> matchList = entry.getValue();
 
             String strFormattedDate = DateUtils.toString("yyyy/MM/dd", date);
-            int dayOfWeek = DateUtils.getDayOfWeek(date);
-            String strFormattedTitle = String.format(strFormattedDate + "\t周%d" + "\t共" + "%2d场比赛", dayOfWeek, matchList.size());
+            int dayOfWeek = DateUtils.getDayOfWeek(date) - 1;
+            String strFormattedTitle = strFormattedDate + "\t周" + (dayOfWeek == 0 ? "日" : String.valueOf(dayOfWeek)) + "\t共" + matchList.size() +  "场比赛";
             Collections.sort(matchList);
             MatchParent matchParent = new MatchParent(strFormattedTitle, matchList);
             matchParent.setDate(date);
@@ -193,6 +197,27 @@ public class MainActivity extends AppCompatActivity
         Collections.sort(matchParents);
 
         return matchParents;
+    }
+
+    private Map<Date, List<Match>> groupByDate(List<Match> matches) {
+        Map<Date, List<Match>> map = new HashMap<>();
+        for (Match m : matches) {
+            Date matchTime = m.getMatchTime();
+            Date date = DateUtils.getDateOfBeforeHours(matchTime, 12); // taken the next day(before 12:00) matches as today's
+            String strKey = DateUtils.toString("yyyy-MM-dd", date);
+            try {
+                Date dateKey = DateUtils.toDate("yyyy-MM-dd", strKey);
+                List<Match> matchList = map.get(dateKey);
+                if (matchList == null) {
+                    matchList = new ArrayList<>();
+                }
+                matchList.add(m);
+                map.put(dateKey, matchList);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return map;
     }
 
     @Override

@@ -2,7 +2,6 @@ package dylan.io.apollobet.models;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverter;
 import android.arch.persistence.room.TypeConverters;
@@ -15,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +28,7 @@ public class Match implements Comparable<Match> {
     @ColumnInfo(name = "id")
     @NonNull
     @PrimaryKey
-    private String id;
+    private String id = "N/A";
 
     @ColumnInfo(name = "number")
     private String number;
@@ -102,11 +100,12 @@ public class Match implements Comparable<Match> {
     @TypeConverters({OddsMapConverter.class})
     private Map<OddsType, Odds> oddsMap = new HashMap<>();
 
+    @NonNull
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(@NonNull String id) {
         this.id = id;
     }
 
@@ -330,9 +329,23 @@ public class Match implements Comparable<Match> {
     }
 
 
+    public boolean expired() {
+        return new Date().after(matchTime);
+    }
+
+    public boolean ongoing() {
+        Date now = new Date();
+        Date endTime = DateUtils.getDateOfAfterMinutes(matchTime, 90 + 30 + 30 + 10);
+        return now.after(matchTime) &&  now.before(endTime);
+    }
+
     public static class OddsMapConverter {
 
-        private static ObjectMapper objectMapper = new ObjectMapper();
+        private static ObjectMapper objectMapper;
+
+        static {
+            objectMapper = new ObjectMapper();
+        }
 
         @TypeConverter
         public static Map<OddsType, Odds> jsonToMap(String json) {

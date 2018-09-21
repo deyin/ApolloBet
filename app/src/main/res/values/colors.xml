@@ -6,15 +6,19 @@
 
 
     <color name="colorMatchInfo">#dae1e1</color>
-    <color name="colorMatchParent">#e7eded</color>
+    <color name="colorMatchParent">#e0e6e6</color>
+
+    <color name="colorMatchExpired">#e8ecec</color>
+    <color name="colorMatchNotExpired">#f3f9f9</color>
+
     <color name="colorArrow">#a0a5a6</color>
     <color name="colorWin">#ffffff</color>
     <color name="colorDraw">#ffffff</color>
     <color name="colorLose">#ffffff</color>
     <color name="colorTableDivider">#c3c9c9</color>
 
-    <color name="colorPositiveSpread">#a2f484</color>
-    <color name="colorNegativeSpread">#fcac7b</color>
+    <color name="colorPositiveSpread">#cffabf</color>
+    <color name="colorNegativeSpread">#ffbfc5</color>
     <color name="colorSelectedMatchNotice">#a9a5a5</color>
     <color name="colorTextOfBtnConfirm">#ffffff</color>
     <color name="colorBtnClear">#717070</color>

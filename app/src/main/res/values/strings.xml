@@ -10,4 +10,5 @@
     <string name="strAutoSelectByOdds">根据赔率自选</string>
     <string name="strAutoSelectByHandicap">根据盘口自选</string>
     <string name="strAutoSelectByProfitAndLoss">根据盈亏自选</string>
+    <string name="spread">让</string>
 </resources>

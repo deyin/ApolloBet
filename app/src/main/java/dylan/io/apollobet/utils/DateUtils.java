@@ -26,6 +26,14 @@ public final class DateUtils {
         return getDays(date1).equals(getDays(date2));
     }
 
+    public static Date getDateOfBeforeHours(@NonNull final Date date, int beforeHours) {
+        return new Date(date.getTime() - beforeHours * 60 * 60 * 1000 );
+    }
+
+    public static Date getDateOfAfterMinutes(@NonNull final Date date, int afterMinutes) {
+        return new Date(date.getTime() - afterMinutes * 60 * 1000 );
+    }
+
     public static Date getDateOfBeforeDays(@NonNull final Date date, int beforeDays) {
         return new Date(date.getTime() - 24 * 60 * 60 * 1000 * beforeDays);
     }
@@ -42,18 +50,18 @@ public final class DateUtils {
         return calendar.getTime();
     }
 
-    public static Calendar getCalendarOfDate(@NonNull Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar;
-    }
-
     public static Date getEndOfDate(@NonNull final Calendar calendar) {
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.HOUR_OF_DAY, 23 + 12); // delay to next day noon until 12:00
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
 
         return calendar.getTime();
+    }
+
+    public static Calendar getCalendarOfDate(@NonNull Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar;
     }
 
     public static int getDayOfWeek(@NonNull Date date) {
