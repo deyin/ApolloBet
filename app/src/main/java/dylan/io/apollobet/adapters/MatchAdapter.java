@@ -136,8 +136,6 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
                 mOnOddsSelectedListener.onOddsSelected(mMatch, oddsType, selected);
                 v.setBackgroundResource(selected ? R.color.colorOddSelected : R.color.colorOddNotSelected);
             }
-
-
         }
 
         @Nullable
@@ -168,12 +166,12 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
 
         public void onBind(int childPosition, Match match) {
 
-            mMatch.setBackgroundResource(match.expired() ? R.color.colorMatchExpired : R.color.colorMatchNotExpired);
+            mMatch.setBackgroundResource(match.finished() ? R.color.colorMatchExpired : R.color.colorMatchNotExpired);
 
             String text = match.getNumber()
                     + "<br/>" + match.getLeagueShortName()
                     + "<br/>" + getDeadlineDisplayTime(match)
-                    + "<br/>" + (match.expired() ? (match.ongoing() ? "<font color=\"yellow\">进行中</font>" : "<font color=\"red\">已结束</font>") : "<font color=\"green\">未开赛</font>");
+                    + "<br/>" + getStatusWithColor(match);
             matchInfo.setText(Html.fromHtml(text));
 
             vs.setText(match.getHostTeamShortName() + match.getHostLeagueOrder()
@@ -193,6 +191,25 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
                     spreadLoseOdds
             }), match);
 
+        }
+
+        private String getStatusWithColor(Match match) {
+            Match.Status status = match.getStatus();
+            String color = "";
+            switch (status) {
+                case NOT_STARTED:
+                    color = "#0B7140"; // green
+                    break;
+                case ON_GOING:
+                    color = "#D1D715"; //yellow
+                    break;
+                case FINISHED:
+                    color = "#EA052B"; // red
+                    break;
+                default:
+                    break;
+            }
+            return "<font color=\"" + color + "\">" + status.toString() + "</font>";
         }
 
         private void onBindOddsViews(@NonNull List<TextView> oddsViews, @NonNull Match match) {
@@ -243,16 +260,16 @@ public class MatchAdapter extends ExpandableRecyclerAdapter<MatchParent, Match,
     private void expandAtLatestMatch(@NonNull List<MatchParent> parentList) {
         Date date = new Date();
         int pos = 0;
-        for(MatchParent parent : parentList) {
+        for (MatchParent parent : parentList) {
             List<Match> matches = parent.getMatches();
             boolean flag = false;
-            for(Match m : matches) {
-                if(date.before(m.getMatchTime())) {
+            for (Match m : matches) {
+                if (date.before(m.getMatchTime())) {
                     flag = true;
                     break;
                 }
             }
-            if(flag) {
+            if (flag) {
                 break;
             }
             pos++;

@@ -293,6 +293,30 @@ public class Match implements Comparable<Match> {
         this.awayLeagueOrder = awayLeagueOrder;
     }
 
+    public boolean notStarted() {
+       return getStatus() == Status.NOT_STARTED;
+    }
+
+
+    public boolean ongoing() {
+        return getStatus() == Status.ON_GOING;
+    }
+
+    public boolean finished() {
+        return getStatus() == Status.FINISHED;
+    }
+
+    public Status getStatus() {
+        Date now = new Date();
+        Date endTime = DateUtils.getDateOfAfterMinutes(matchTime, 90 + 10);
+        if(now.before(matchTime)) {
+            return Status.NOT_STARTED;
+        } else if(now.before(endTime)) {
+            return Status.ON_GOING;
+        } else {
+            return Status.FINISHED;
+        }
+    }
 
     public void put(OddsType type, Odds odds) {
         oddsMap.put(type, odds);
@@ -328,17 +352,6 @@ public class Match implements Comparable<Match> {
         return this.matchTime.compareTo(o.matchTime);
     }
 
-
-    public boolean expired() {
-        return new Date().after(matchTime);
-    }
-
-    public boolean ongoing() {
-        Date now = new Date();
-        Date endTime = DateUtils.getDateOfAfterMinutes(matchTime, 90 + 30 + 30 + 10);
-        return now.after(matchTime) &&  now.before(endTime);
-    }
-
     public static class OddsMapConverter {
 
         private static ObjectMapper objectMapper;
@@ -367,6 +380,29 @@ public class Match implements Comparable<Match> {
                 Log.e("mapToJson", e.getMessage() );
             }
             return "{}";
+        }
+    }
+
+    public static enum Status {
+
+        NOT_STARTED(0, "未开赛"),
+
+        ON_GOING(1, "进行中"),
+
+        FINISHED(2, "已结束");
+
+        int code;
+
+        String description;
+
+        Status(int code, String description) {
+            this.code = code;
+            this.description = description;
+        }
+
+        @Override
+        public String toString() {
+            return this.description;
         }
     }
 
